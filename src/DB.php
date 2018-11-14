@@ -2,29 +2,6 @@
 
 namespace DF;
 
-/*
-	A simple class for reading and writing data
-	
-	METHODS
-	
-	static query(string sql, [function $callback], [boolean $fetch])
-		The query function is used to execute an sql statement from the database. It use a child class of MysqlO
-		This function is used by all other methods to perform operations
-		* $callback function can be used to execute a specific function with the result of the query;
-		* $fetch = true will return an associative array after executing the query
-		
-	static read(string $table, array $match)
-	
-	static update(string $table, array $match)
-		This function can be used for creating new entries and also for updating existing ones
-		It uses entry update if a Duplicate key is found
-		
-	static delete(string $table, array $match)
-		just as the name sounds
-		
-		
-	static read
-*/
 class DB{
 	private $con = [];
 	
@@ -48,7 +25,7 @@ class DB{
 		return $this->con;
 	}
 
-	public function getPDO(){
+	public function get(){
 		return $this->connect();
 	}
 
