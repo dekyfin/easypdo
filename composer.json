@@ -1,5 +1,5 @@
 {
-    "name": "dekyfin/easypdo",
+    "name": "dekyfin/simplepdo",
     "description": "A convenient wrapper for PDO. Supports only MySQL at the moment",
     "version": "1.0.0",
     "authors": [
@@ -9,7 +9,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "php": "^5.4.0 || ^7.0"
+    },
     "autoload": {
         "classmap": ["src/DB.php"],
         "psr-4": {
