@@ -1,11 +1,11 @@
-# simplePDO
+# EasyPDO
 A convenient wrapper for PDO. Supports only MySQL at the moment
 
 ## Installation
 
 ### Composer
 ```
-composer require dekyfin/easydb
+composer require dekyfin/easypdo
 ```
 ### Manual
 
