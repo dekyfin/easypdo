@@ -1,6 +1,7 @@
 {
     "name": "dekyfin/easypdo",
     "description": "A convenient wrapper for PDO. Supports only MySQL at the moment",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "Desmond Kyeremeh",
