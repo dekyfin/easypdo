@@ -38,7 +38,8 @@ class DB extends \PDO{
 			$stmt->execute($values);
 			
 			if($fetch){
-				return $stmt->fetchAll();
+				$id = $this->lastInsertId();
+				return $id ? $id : ( $stmt->columnCount() ? $stmt->fetchAll() : $stmt->rowCount());
 			}
 			else{
 				return $stmt;
@@ -53,7 +54,8 @@ class DB extends \PDO{
 		try{
 			$res = parent::query($query);
 			if($fetch){
-				return $res->fetchAll();
+				$id = $this->lastInsertId();
+				return $id ? $id : ( $stmt->columnCount() ? $stmt->fetchAll() : $stmt->rowCount());
 			}
 			else{
 				return $res;
@@ -99,8 +101,7 @@ class DB extends \PDO{
 			$values[":$key"] = $val;
 		}
 		$query="INSERT INTO `$table`($keys) VALUES($vals)";
-		$this->execute($query, $values);
-		return $this->lastInsertId();
+		return $this->execute($query, $values, true);
 	}
 
 	public function update($table, array $data, array $thisd){
@@ -115,12 +116,12 @@ class DB extends \PDO{
 			$values[":$key"] = $val;
 		}
 		foreach($thisd as $key=>$val){
-			$C++ == 0 || $and = " AND";
+			$c == 0 || $and = " AND";
 			$thisditions .= "$and `$key`=:$key" . 2;
 			$values[":$key" . 2] = $val;
 		}
 		$query="UPDATE `$table` SET $pairs WHERE $thisditions";
-		return $this->execute($query, $values)->rowCount();
+		return $this->execute($query, $values, true);
 	}
 
 	public function insertUpdate($table, $data){
@@ -138,7 +139,7 @@ class DB extends \PDO{
 		}
 		$query="INSERT INTO `". $table ."`($keys) VALUES($vals)
 		ON DUPLICATE KEY UPDATE $pairs ";
-		return $this->execute($query, $values);
+		return $this->execute($query, $values, true);
 	}
 
 	public function delete($table, $data){
@@ -151,6 +152,6 @@ class DB extends \PDO{
 			$values[":$key"] = $val;
 		}
 		$query="DELETE FROM `". $table ."` WHERE $pairs ";
-		return $this->execute($query, $values)->rowCount();
+		return $this->execute($query, $values, true);
 	}
 }

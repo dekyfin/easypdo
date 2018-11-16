@@ -25,6 +25,35 @@ $rows = $db->fetchAll( $stmt2 );
 $rows = $db->select("table", ["col1"=>"val1", "col2"=>"val2"]);
 ```
 
+## What Can EasyPDO Do?
+1. Convenient wrappers for all CRUD operations
+	1. SELECT
+	2. UPDATE
+	3. INSERT
+	4. DELETE
+	5. INSERT/UPDATE
+2. Easily get the insertId for INSERT, affected rows for UPDATE/DELETE, and array of rows for SELECT statements.
+```php
+/*	Take note of the  the 2nd parameter:
+*	A value of true ocauses the function to return the 'convenient data', 
+*	while false returns the PDOStatement Object
+*/
+
+// Select Statement
+$rows = $db->execute("SELECT id FROM table WHERE id < :max", ["max"=>3], true);
+// Output: array of matched rows
+
+$insertId = $db->execute("INSERT INTO table(col1, col2) VALUES(:col1, :col2)", ["col1"=>"val1", "col2"=>"val2"], true);
+//Output: inserId
+
+$affectedRows = $db->execute("DELETE FROM table WHERE id = :id", ["id"=>5], true);
+//Output: affected rows
+
+$affectedRows = $db->execute("UPDATE table SET col1 = :col1 WHERE id = :id", ["id"=>5, "col1"=>"valX"], true);
+//Output: affected rows
+
+```
+3. Use plain old PDO anytime you want
 
 ## Installation
 
@@ -44,6 +73,8 @@ require_once "/path/to/src/DB.php";
 ## Usage
 
 ```PHP
+
+// Options for connecting to MySQL database
 $options = [
 	"host"=>"localhost",
 	"user"=>"db_user",
@@ -51,7 +82,10 @@ $options = [
 	"pass"=>"s3cr3tp@ssw0rd"
 ];
 
+// Create connection
 $db = new DF\DB($options);
+
+// Run queries
 $rows = $db->query("SELECT * FROM table", true);
 
 ```
@@ -75,7 +109,8 @@ $data = $db->select("table", ["category"=>3] , "ORDER BY id DESC");
 
 ### update( string $table, array $values = [] [, array $conditions] ): int $rowCount
 
-### insertUpdate( string $table, array $values ): PDOStatement
+### insertUpdate( string $table, array $values ): int insertId
+Note: This method will return the insertId of the row if insert or update worked successfully
 
 ### delete( string $table, array $conditions): int $rowCount
 
