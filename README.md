@@ -58,25 +58,6 @@ $rows = $db->query("SELECT * FROM table", true);
 
 # Methods
 
-### query( string $sql , boolean $fetchAll = false )
-
-This function is used to run an sql query.
-Returns array of data if $fetchAll is true, and a PDOStatement object if false
-
-```php
-$data = $db->query("Select id FROM table", true); // [ [id=>1], [id=>2] ... ]
-
-```
-
-### execute( string $sql, array $values , boolean $fetchAll = false )
-Used to prepare and execute a statement. Useful for running a one-off prepared statement
-Returns array of data if $fetchAll is true, and a PDOStatement object if false
-
-```php
-$data = $db->execute("Select id FROM table WHERE id < :max", ["max"=>3] , true); // [ [id=>1], [id=>2] ... ]
-
-```
-
 ### select( string $table, array $conditions = [] , mixed $modifiers ): array $rows
 Used to select rows matching some `$conditions`. This method currently selects all columns. It will be modified in v2.x.x to allow specifying of columns
 
@@ -92,11 +73,30 @@ $data = $db->select("table", ["category"=>3] , "ORDER BY id DESC");
 ```
 ### insert( string $table, array $values ): int $insertId
 
-### update( string $table, array $values = [] , array $conditions ): int $rowCount
+### update( string $table, array $values = [] [, array $conditions] ): int $rowCount
 
 ### insertUpdate( string $table, array $values ): PDOStatement
 
-### delete( string $table, array $conditions = []): int $rowCount
+### delete( string $table, array $conditions): int $rowCount
+
+### query( string $sql , boolean $fetchAll = false )
+
+This function is used to run an sql query.
+Returns array of data if $fetchAll is true, and a PDOStatement object if false
+
+```php
+$data = $db->query("Select id FROM table", true); // [ [id=>1], [id=>2] ... ]
+
+```
+
+### execute( string $sql, array $values , boolean $fetchAll = false )
+Used to prepare and execute a statement. Useful for running a one-off prepared statement.
+Returns array of data if $fetchAll is true, and a PDOStatement object if false
+
+```php
+$data = $db->execute("Select id FROM table WHERE id < :max", ["max"=>3] , true); // [ [id=>1], [id=>2] ... ]
+
+```
 
 ### prepare( string $sql ): PDOStatement
 
@@ -109,5 +109,3 @@ $stmt->execute(["col1" => 50, "col2" => 2e6 ]);
 
 ```
 
-### get(): PDO
-Get the PDO object to do anything not implemented by EasyPDO

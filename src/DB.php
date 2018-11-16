@@ -2,56 +2,47 @@
 
 namespace DF;
 
-class DB{
-	private $con = [];
-	
-	private $db = [];
+class DB extends \PDO{
 
-	function __construct( array $db ){
-		if( !( $db["host"] && $db["user"] & $db["db"] & $db["pass"]) ){
+	function __construct( array $options ){
+
+		// Check if all relevant options are set
+		if( !( $options["host"] && $options["user"] & $options["db"] & $options["pass"]) ){
 			trigger_error("A required field needed to connect to the database is missing");
 		}
-		$this->db = $db;
-	}
-	
-	private function connect(){
-		if( !$this->con ){
-			extract ($this->db);
-			$this->con = new \PDO("mysql:host=$host;dbname=$db", $user, $pass);
+
+		// Create PDO instance and set relevant options
+		try{
+			parent::__construct("mysql:host=$options[host];dbname=$options[db]", $options["user"], $options["pass"]);
 			
-			$this->con->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
-			$this->con->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+			$this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
+			$this->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 		}
-		return $this->con;
+		catch(PDOException $e){
+			trigger_error($e->getMessage());
+		}
 	}
 
 	public function get(){
-		return $this->connect();
+		return $this;
 	}
 
-	static function fetch( $res ){
-		return $res->fetchAll();
-	}
-
-	public function prepare( $query ){
-		return $this->connect()->prepare($query);
-	}
-
-	public function execute($query, array $values=[], $fetch = false){
+	public function execute( $query, array $values=[], $fetch = false ){
 		//create connection
 		if(!$fetch && gettype($values)!= "array" ){
 			$fetch = $values;
 			$values = [];
 		}
 		try{
-			$con = $this->connect();
-			$stmt = $con->prepare($query);
+			$stmt = $this->prepare($query);
 			$stmt->execute($values);
 			
-			if($fetch)
-				return static::fetch($stmt);
-			else
+			if($fetch){
+				return $stmt->fetchAll();
+			}
+			else{
 				return $stmt;
+			}
 		}
 		catch(PDOException $e){
 			trigger_error($e->getMessage());
@@ -60,25 +51,27 @@ class DB{
 	
 	public function query($query, $fetch=false){
 		try{
-			$con = $this->connect();
-			$res = $con->query($query);
-			if($fetch)
-				return static::fetch($res);
-			else
+			$res = parent::query($query);
+			if($fetch){
+				return $res->fetchAll();
+			}
+			else{
 				return $res;
+			}
 		}
 		catch(PDOException $e){
 			trigger_error($e->getMessage());
 		}
 	}
 
-	public function select($table, $cond=false, $mods = ""){
+	public function select($table, $thisd=false, $mods = ""){
 
+		$c = 0;
 		$values = [];
-		$MATCH = "";
+		$MATCH = $and = "";
 
-		if(gettype($cond)=="array"){
-			foreach ($cond as $key=>$val){
+		if(gettype($thisd)=="array"){
+			foreach ($thisd as $key=>$val){
 				$c++ == 0 || $and = " AND";
 				$MATCH .= "$and `$key` = :$key";
 				$values[":$key"] = $val;
@@ -91,11 +84,11 @@ class DB{
 		}
 			
 		$query="SELECT * FROM `" . $table . "`" . $MATCH . " $mods";
-		return static::execute($query, $values, true);
+		return $this->execute($query, $values, true);
 	}
 
 	public function insert($table, array $data){
-		
+		$count = 0;
 		$comma = $keys = $vals = "";
 		$values = [];
 
@@ -106,13 +99,14 @@ class DB{
 			$values[":$key"] = $val;
 		}
 		$query="INSERT INTO `$table`($keys) VALUES($vals)";
-		static::execute($query, $values);
-		return $this->con->lastInsertId();
+		$this->execute($query, $values);
+		return $this->lastInsertId();
 	}
 
-	public function update($table, array $data, array $cond){
+	public function update($table, array $data, array $thisd){
 
-		$count = $conditions = $pairs = "";
+		$c = 0;
+		$count = $thisditions = $pairs = $and = "";
 		$values = [];
 
 		foreach($data as $key=>$val){
@@ -120,19 +114,19 @@ class DB{
 			$pairs .= "$comma `$key`=:$key";
 			$values[":$key"] = $val;
 		}
-		foreach($cond as $key=>$val){
+		foreach($thisd as $key=>$val){
 			$C++ == 0 || $and = " AND";
-			$conditions .= "$and `$key`=:$key" . 2;
+			$thisditions .= "$and `$key`=:$key" . 2;
 			$values[":$key" . 2] = $val;
 		}
-		$query="UPDATE `$table` SET $pairs WHERE $conditions";
-		return static::execute($query, $values)->rowCount();
+		$query="UPDATE `$table` SET $pairs WHERE $thisditions";
+		return $this->execute($query, $values)->rowCount();
 	}
 
 	public function insertUpdate($table, $data){
 		
 		$count = 0;
-		$keys = $vals = $pairs;
+		$keys = $vals = $pairs = "";
 		$values = [];
 
 		foreach($data as $key=>$val){
@@ -144,7 +138,7 @@ class DB{
 		}
 		$query="INSERT INTO `". $table ."`($keys) VALUES($vals)
 		ON DUPLICATE KEY UPDATE $pairs ";
-		return static::execute($query, $values);
+		return $this->execute($query, $values);
 	}
 
 	public function delete($table, $data){
@@ -157,6 +151,6 @@ class DB{
 			$values[":$key"] = $val;
 		}
 		$query="DELETE FROM `". $table ."` WHERE $pairs ";
-		return static::execute($query, $values)->rowCount();
+		return $this->execute($query, $values)->rowCount();
 	}
 }
